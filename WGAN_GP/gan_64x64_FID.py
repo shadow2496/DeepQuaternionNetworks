@@ -61,7 +61,7 @@ else:
 OUTPUT_STEP = 200 # Print output every OUTPUT_STEP
 SAVE_SAMPLES_STEP = 200 # Generate and save samples every SAVE_SAMPLES_STEP
 
-LOAD_CHECKPOINT = FALSE
+LOAD_CHECKPOINT = False
 DIR = "mmdd_hhmmss_lrd_lrg"
 ITER_START = 0
 
@@ -118,7 +118,7 @@ def load_checkpoint(session, saver, checkpoint_dir):
     print(" [*] Failed to find a checkpoint")
     return False
 
-lib.print_model_settings(locals().copy(), LOG_DIR)
+lib.print_model_settings(locals().copy())
 
 def GeneratorAndDiscriminator():
     """
