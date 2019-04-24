@@ -51,6 +51,7 @@ def Batchnorm(name, axes, inputs, is_training=None, stats_iter=None, update_movi
         if is_training is None:
             outputs, batch_mean, batch_var = _fused_batch_norm_training()
         else:
+            # determine whether train or inference by check is_training
             outputs, batch_mean, batch_var = tf.cond(is_training,
                                                        _fused_batch_norm_training,
                                                        _fused_batch_norm_inference)
