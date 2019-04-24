@@ -5,7 +5,7 @@ import os
 from glob import glob
 
 def make_generator(path, batch_size, dataset):
-    print("scan files", end=" ", flush=True)
+    #print("scan files", end=" ", flush=True)
     if dataset == "celeba":
       files = glob(os.path.join(path, "*.jpg"))
       dim = 64
@@ -17,7 +17,7 @@ def make_generator(path, batch_size, dataset):
       # into subdirectories named 0, 1, .., 304
       files = []
       for i in range(304):
-        print("\rscan files %d" % i, end="", flush=True)
+        #print("\rscan files %d" % i, end="", flush=True)
         files += glob(os.path.join(path, str(i), "*.jpg"))
       dim = 64
     n_files = len(files)
