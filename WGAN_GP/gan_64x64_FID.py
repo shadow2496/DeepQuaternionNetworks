@@ -19,6 +19,13 @@ import tflib.plot
 
 import fid
 
+from quaternion_layers.bn import QuaternionBatchNormalization as QuaternionBatchNorm
+from quaternion_layers.norm import QuaternionLayerNorm
+
+from keras import backend as K
+
+
+
 '''
 Works also with 32x32x3 images, just set DIM to 32
 '''
@@ -168,12 +175,43 @@ def LeakyReLULayer(name, n_in, n_out, inputs):
 
 def Normalize(name, axes, inputs):
     if ('Discriminator' in name) and (MODE == 'wgan-gp'):
+        # axes [0,2,3] means 
         if axes != [0,2,3]:
             raise Exception('Layernorm over non-standard axes is unsupported')
         return lib.ops.layernorm.Layernorm(name,[1,2,3],inputs)
     else:
         #return lib.ops.layernorm.Layernorm(name,[1,2,3],inputs)
         return lib.ops.batchnorm.Batchnorm(name,axes,inputs,fused=True)
+
+def QuaternionNormalize(name, inputs, stats_iter=None) :
+    channelAxis = 1
+    momentum = 0.9
+
+    if stats_iter != None :
+        ''' When Inference, This value is used to calculate Moving Average Momentum. If None, default value would be used. '''
+        float_stats_iter = tf.cast(stats_iter, tf.float32)
+        momentum = float_stats_iter / float_stats_iter + 1
+
+    if ('Discriminator' in name) and (MODE == 'wgan-gp'):
+        lnArgs = {
+        'name' : name,
+        'axis' : channelAxis,
+        'epsilon' : 1e-5
+        }
+
+        return QuaternionLayerNorm(**lnArgs)(inputs)
+
+    else:
+        bnArgs = {
+        'name': name,
+        "axis": channelAxis,
+        "momentum": momentum,
+        "epsilon": 1e-5
+        }
+
+        ''' When using BN, "training=False" is necessary as call argument'''
+
+        return QuaternionBatchNorm(**bnArgs)(inputs)
 
 def pixcnn_gated_nonlinearity(a, b):
     return tf.sigmoid(a) * tf.tanh(b)
@@ -549,7 +587,9 @@ def DCGANDiscriminator(inputs, dim=DIM, bn=True, nonlinearity=LeakyReLU):
 
     return tf.reshape(output, [-1])
 
+
 Generator, Discriminator = GeneratorAndDiscriminator()
+
 
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
 
