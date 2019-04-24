@@ -76,11 +76,11 @@ class LayerNormalization(Layer):
         self.gamma = self.add_weight(shape,
                                      initializer=self.gamma_init,
                                      regularizer=self.gamma_regularizer,
-                                     name='{}_gamma'.format(self.name))
+                                     name=self.name+'{}_gamma'.format(self.name))
         self.beta = self.add_weight(shape,
                                     initializer=self.beta_init,
                                     regularizer=self.beta_regularizer,
-                                    name='{}_beta'.format(self.name))
+                                    name=self.name+'{}_beta'.format(self.name))
 
         self.built = True
 
@@ -100,6 +100,7 @@ class LayerNormalization(Layer):
 
 class QuaternionLayerNorm(Layer):
     def __init__(self,
+                 name="",
                  epsilon=1e-4,
                  axis=-1,
                  center=True,
@@ -116,6 +117,7 @@ class QuaternionLayerNorm(Layer):
                  **kwargs):
 
         self.supports_masking = True
+        self.name = name
         self.epsilon = epsilon
         self.axis = axis
         self.center = center
@@ -147,70 +149,70 @@ class QuaternionLayerNorm(Layer):
         if self.scale:
             self.gamma_rr = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_rr',
+                name=self.name+'.gamma_rr',
                 initializer=self.gamma_diag_initializer,
                 regularizer=self.gamma_diag_regularizer,
                 constraint=self.gamma_diag_constraint
             )
             self.gamma_ii = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_ii',
+                name=self.name+'.gamma_ii',
                 initializer=self.gamma_diag_initializer,
                 regularizer=self.gamma_diag_regularizer,
                 constraint=self.gamma_diag_constraint
             )
             self.gamma_jj = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_jj',
+                name=self.name+'.gamma_jj',
                 initializer=self.gamma_diag_initializer,
                 regularizer=self.gamma_diag_regularizer,
                 constraint=self.gamma_diag_constraint
             )
             self.gamma_kk = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_kk',
+                name=self.name+'.gamma_kk',
                 initializer=self.gamma_diag_initializer,
                 regularizer=self.gamma_diag_regularizer,
                 constraint=self.gamma_diag_constraint
             )
             self.gamma_ri = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_ri',
+                name=self.name+'.gamma_ri',
                 initializer=self.gamma_off_initializer,
                 regularizer=self.gamma_off_regularizer,
                 constraint=self.gamma_off_constraint
             )
             self.gamma_rj = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_rj',
+                name=self.name+'.gamma_rj',
                 initializer=self.gamma_off_initializer,
                 regularizer=self.gamma_off_regularizer,
                 constraint=self.gamma_off_constraint
             )
             self.gamma_rk = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_rk',
+                name=self.name+'.gamma_rk',
                 initializer=self.gamma_off_initializer,
                 regularizer=self.gamma_off_regularizer,
                 constraint=self.gamma_off_constraint
             )
             self.gamma_ij = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_ij',
+                name=self.name+'.gamma_ij',
                 initializer=self.gamma_off_initializer,
                 regularizer=self.gamma_off_regularizer,
                 constraint=self.gamma_off_constraint
             )
             self.gamma_ik = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_ik',
+                name=self.name+'.gamma_ik',
                 initializer=self.gamma_off_initializer,
                 regularizer=self.gamma_off_regularizer,
                 constraint=self.gamma_off_constraint
             )
             self.gamma_jk = self.add_weight(
                 shape=gamma_shape,
-                name='gamma_jk',
+                name=self.name+'.gamma_jk',
                 initializer=self.gamma_off_initializer,
                 regularizer=self.gamma_off_regularizer,
                 constraint=self.gamma_off_constraint
@@ -229,7 +231,7 @@ class QuaternionLayerNorm(Layer):
 
         if self.center:
             self.beta = self.add_weight(shape=(input_shape[self.axis],),
-                                        name='beta',
+                                        name=self.name+'.beta',
                                         initializer=self.beta_initializer,
                                         regularizer=self.beta_regularizer,
                                         constraint=self.beta_constraint)
@@ -367,6 +369,7 @@ class QuaternionLayerNorm(Layer):
 
     def get_config(self):
         config = {
+            'name': self.name,
             'axis': self.axis,
             'epsilon': self.epsilon,
             'center': self.center,
