@@ -278,6 +278,7 @@ class QuaternionBatchNormalization(Layer):
     """
 
     def __init__(self,
+                 name="",
                  axis=-1,
                  momentum=0.9,
                  epsilon=1e-4,
@@ -298,6 +299,7 @@ class QuaternionBatchNormalization(Layer):
                  **kwargs):
         super(QuaternionBatchNormalization, self).__init__(**kwargs)
         self.supports_masking = True
+        self.name = name
         self.axis = axis
         self.momentum = momentum
         self.epsilon = epsilon
@@ -339,94 +341,94 @@ class QuaternionBatchNormalization(Layer):
 
         if self.scale:
             self.gamma_rr = self.add_weight(shape=param_shape,
-                                            name='gamma_rr',
+                                            name=self.name+'.gamma_rr',
                                             initializer=self.gamma_diag_initializer,
                                             regularizer=self.gamma_diag_regularizer,
                                             constraint=self.gamma_diag_constraint)
             self.gamma_ii = self.add_weight(shape=param_shape,
-                                            name='gamma_ii',
+                                            name=self.name+'.gamma_ii',
                                             initializer=self.gamma_diag_initializer,
                                             regularizer=self.gamma_diag_regularizer,
                                             constraint=self.gamma_diag_constraint)
             self.gamma_jj = self.add_weight(shape=param_shape,
-                                            name='gamma_jj',
+                                            name=self.name+'.gamma_jj',
                                             initializer=self.gamma_diag_initializer,
                                             regularizer=self.gamma_diag_regularizer,
                                             constraint=self.gamma_diag_constraint)
             self.gamma_kk = self.add_weight(shape=param_shape,
-                                            name='gamma_kk',
+                                            name=self.name+'.gamma_kk',
                                             initializer=self.gamma_diag_initializer,
                                             regularizer=self.gamma_diag_regularizer,
                                             constraint=self.gamma_diag_constraint)
             self.gamma_ri = self.add_weight(shape=param_shape,
-                                            name='gamma_ri',
+                                            name=self.name+'.gamma_ri',
                                             initializer=self.gamma_off_initializer,
                                             regularizer=self.gamma_off_regularizer,
                                             constraint=self.gamma_off_constraint)
             self.gamma_rj = self.add_weight(shape=param_shape,
-                                            name='gamma_rj',
+                                            name=self.name+'.gamma_rj',
                                             initializer=self.gamma_off_initializer,
                                             regularizer=self.gamma_off_regularizer,
                                             constraint=self.gamma_off_constraint)
             self.gamma_rk = self.add_weight(shape=param_shape,
-                                            name='gamma_rk',
+                                            name=self.name+'.gamma_rk',
                                             initializer=self.gamma_off_initializer,
                                             regularizer=self.gamma_off_regularizer,
                                             constraint=self.gamma_off_constraint)
             self.gamma_ij = self.add_weight(shape=param_shape,
-                                            name='gamma_ij',
+                                            name=self.name+'.gamma_ij',
                                             initializer=self.gamma_off_initializer,
                                             regularizer=self.gamma_off_regularizer,
                                             constraint=self.gamma_off_constraint)
             self.gamma_ik = self.add_weight(shape=param_shape,
-                                            name='gamma_ik',
+                                            name=self.name+'.gamma_ik',
                                             initializer=self.gamma_off_initializer,
                                             regularizer=self.gamma_off_regularizer,
                                             constraint=self.gamma_off_constraint)
             self.gamma_jk = self.add_weight(shape=param_shape,
-                                            name='gamma_jk',
+                                            name=self.name+'.gamma_jk',
                                             initializer=self.gamma_off_initializer,
                                             regularizer=self.gamma_off_regularizer,
                                             constraint=self.gamma_off_constraint)
             self.moving_Vrr = self.add_weight(shape=param_shape,
                                               initializer=self.moving_variance_initializer,
-                                              name='moving_Vrr',
+                                              name=self.name+'.moving_Vrr',
                                               trainable=False)
             self.moving_Vii = self.add_weight(shape=param_shape,
                                               initializer=self.moving_variance_initializer,
-                                              name='moving_Vii',
+                                              name=self.name+'.moving_Vii',
                                               trainable=False)
             self.moving_Vjj = self.add_weight(shape=param_shape,
                                               initializer=self.moving_variance_initializer,
-                                              name='moving_Vjj',
+                                              name=self.name+'.moving_Vjj',
                                               trainable=False)
             self.moving_Vkk = self.add_weight(shape=param_shape,
                                               initializer=self.moving_variance_initializer,
-                                              name='moving_Vkk',
+                                              name=self.name+'.moving_Vkk',
                                               trainable=False)
             self.moving_Vri = self.add_weight(shape=param_shape,
                                               initializer=self.moving_covariance_initializer,
-                                              name='moving_Vri',
+                                              name=self.name+'.moving_Vri',
                                               trainable=False)
             self.moving_Vrj = self.add_weight(shape=param_shape,
                                               initializer=self.moving_covariance_initializer,
-                                              name='moving_Vrj',
+                                              name=self.name+'.moving_Vrj',
                                               trainable=False)
             self.moving_Vrk = self.add_weight(shape=param_shape,
                                               initializer=self.moving_covariance_initializer,
-                                              name='moving_Vrk',
+                                              name=self.name+'.moving_Vrk',
                                               trainable=False)
             self.moving_Vij = self.add_weight(shape=param_shape,
                                               initializer=self.moving_covariance_initializer,
-                                              name='moving_Vij',
+                                              name=self.name+'.moving_Vij',
                                               trainable=False)
             self.moving_Vik = self.add_weight(shape=param_shape,
                                               initializer=self.moving_covariance_initializer,
-                                              name='moving_Vik',
+                                              name=self.name+'.moving_Vik',
                                               trainable=False)
             self.moving_Vjk = self.add_weight(shape=param_shape,
                                               initializer=self.moving_covariance_initializer,
-                                              name='moving_Vjk',
+                                              name=self.name+'.moving_Vjk',
                                               trainable=False)
         else:
             self.gamma_rr = None
@@ -452,13 +454,13 @@ class QuaternionBatchNormalization(Layer):
 
         if self.center:
             self.beta = self.add_weight(shape=(input_shape[self.axis],),
-                                        name='beta',
+                                        name=self.name+'.beta',
                                         initializer=self.beta_initializer,
                                         regularizer=self.beta_regularizer,
                                         constraint=self.beta_constraint)
             self.moving_mean = self.add_weight(shape=(input_shape[self.axis],),
                                                initializer=self.moving_mean_initializer,
-                                               name='moving_mean',
+                                               name=self.name+'.moving_mean',
                                                trainable=False)
         else:
             self.beta = None
@@ -637,6 +639,7 @@ class QuaternionBatchNormalization(Layer):
 
     def get_config(self):
         config = {
+            'name': self.name,
             'axis': self.axis,
             'momentum': self.momentum,
             'epsilon': self.epsilon,
