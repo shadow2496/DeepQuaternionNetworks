@@ -20,9 +20,11 @@ import tflib.plot
 import fid
 
 from quaternion_layers.bn import QuaternionBatchNormalization as QuaternionBatchNorm
+from quaternion_layers.conv import QuaternionConv2D
 from quaternion_layers.norm import QuaternionLayerNorm
 
 import keras.backend as K
+from keras.regularizers import l2
 
 
 '''
@@ -242,6 +244,19 @@ def UpsampleConv(name, input_dim, output_dim, filter_size, inputs, he_init=True,
     output = tf.transpose(output, [0,3,1,2])
     output = lib.ops.conv2d.Conv2D(name, input_dim, output_dim, filter_size, output, he_init=he_init, biases=biases)
     return output
+
+def QConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=True, stride=1, biases=True):
+    convArgs = {
+        'padding': 'same',
+        'use_bias': biases,
+        'kernel_regularizer': l2(0.0001),
+        'init_criterion': 'he' if he_init else 'glorot'
+    }
+
+    with tf.name_scope(name) as scope:
+        result = QuaternionConv2D(output_dim, (filter_size, filter_size), strides=(stride, stride), **convArgs)(inputs)
+
+        return result
 
 def BottleneckResidualBlock(name, input_dim, output_dim, filter_size, inputs, resample=None, he_init=True):
     """
