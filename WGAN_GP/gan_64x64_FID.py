@@ -22,8 +22,7 @@ import fid
 from quaternion_layers.bn import QuaternionBatchNormalization as QuaternionBatchNorm
 from quaternion_layers.norm import QuaternionLayerNorm
 
-from keras import backend as K
-
+import keras.backend as K
 
 
 '''
@@ -190,7 +189,7 @@ def QuaternionNormalize(name, inputs, stats_iter=None) :
     if stats_iter != None :
         ''' When Inference, This value is used to calculate Moving Average Momentum. If None, default value would be used. '''
         float_stats_iter = tf.cast(stats_iter, tf.float32)
-        momentum = float_stats_iter / float_stats_iter + 1
+        momentum = float_stats_iter / (float_stats_iter + 1)
 
     if ('Discriminator' in name) and (MODE == 'wgan-gp'):
         lnArgs = {
@@ -590,8 +589,8 @@ def DCGANDiscriminator(inputs, dim=DIM, bn=True, nonlinearity=LeakyReLU):
 
 Generator, Discriminator = GeneratorAndDiscriminator()
 
-
 with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
+    K.set_session(session)
 
     all_real_data_conv = tf.placeholder(tf.int32, shape=[BATCH_SIZE, 3, DIM, DIM])
     if tf.__version__.startswith('1.'):
