@@ -20,7 +20,7 @@ import tflib.plot
 import fid
 
 from quaternion_layers.bn import QuaternionBatchNormalization as QuaternionBatchNorm
-from quaternion_layers.conv import QuaternionConv2D
+from quaternion_layers.conv import QuaternionConv2D as QConv2D
 from quaternion_layers.norm import QuaternionLayerNorm
 
 import keras.backend as K
@@ -245,7 +245,7 @@ def UpsampleConv(name, input_dim, output_dim, filter_size, inputs, he_init=True,
     output = lib.ops.conv2d.Conv2D(name, input_dim, output_dim, filter_size, output, he_init=he_init, biases=biases)
     return output
 
-def QConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=True, stride=1, biases=True):
+def QuaternionConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=True, stride=1, biases=True):
     convArgs = {
         'padding': 'same',
         'use_bias': biases,
@@ -254,7 +254,7 @@ def QConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=True, stri
     }
 
     with tf.name_scope(name) as scope:
-        result = QuaternionConv2D(output_dim, (filter_size, filter_size), strides=(stride, stride), **convArgs)(inputs)
+        result = QConv2D(output_dim, (filter_size, filter_size), strides=(stride, stride), **convArgs)(inputs)
         return result
 
 def LearnVectorBlock(name, input_dim, output_dim, filter_size, inputs, he_init=True):
