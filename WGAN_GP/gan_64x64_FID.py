@@ -195,9 +195,9 @@ def QuaternionNormalize(name, inputs, stats_iter=None) :
 
     if ('Discriminator' in name) and (MODE == 'wgan-gp'):
         lnArgs = {
-        'name' : name,
-        'axis' : channelAxis,
-        'epsilon' : 1e-5
+        'name': name,
+        'axis': channelAxis,
+        'epsilon': 1e-04
         }
 
         return QuaternionLayerNorm(**lnArgs)(inputs)
@@ -207,7 +207,7 @@ def QuaternionNormalize(name, inputs, stats_iter=None) :
         'name': name,
         "axis": channelAxis,
         "momentum": momentum,
-        "epsilon": 1e-5
+        "epsilon": 1e-04
         }
 
         ''' When using BN, "training=False" is necessary as call argument'''
@@ -255,8 +255,24 @@ def QConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=True, stri
 
     with tf.name_scope(name) as scope:
         result = QuaternionConv2D(output_dim, (filter_size, filter_size), strides=(stride, stride), **convArgs)(inputs)
-
         return result
+
+def LearnVectorBlock(name, input_dim, output_dim, filter_size, inputs, he_init=True):
+    """Learn initial vector component for input."""
+
+    # TODO use Normalize(name + '.BN1', [0, 2, 3], inputs) instead
+    output = lib.ops.batchnorm.Batchnorm(name + '.BN1', [0, 2, 3], inputs, fused=True)
+    output = tf.nn.relu(output)
+    # Kernel regularizer function l2(0.0001) is excluded
+    output = lib.ops.conv2d.Conv2D(name + '.Conv1', input_dim, output_dim, filter_size, output, he_init=he_init, biases=False)
+
+    # TODO use Normalize(name + '.BN2', [0, 2, 3], inputs) instead
+    output = lib.ops.batchnorm.Batchnorm(name + '.BN2', [0, 2, 3], output, fused=True)
+    output = tf.nn.relu(output)
+    # Kernel regularizer function l2(0.0001) is excluded
+    output = lib.ops.conv2d.Conv2D(name + '.Conv2', input_dim, output_dim, filter_size, output, he_init=he_init, biases=False)
+
+    return output
 
 def BottleneckResidualBlock(name, input_dim, output_dim, filter_size, inputs, resample=None, he_init=True):
     """
