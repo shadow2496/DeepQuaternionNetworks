@@ -569,6 +569,26 @@ def GoodDiscriminator(inputs, dim=DIM, bn=BN_D):
 
     return tf.reshape(output, [-1])
 
+def QuaternionDiscriminator(inputs, dim=DIM, bn=BN_D):
+    fact = DIM // 16
+
+    R = tf.reshape(inputs, [-1, 3, DIM, DIM])
+    I = LearnVectorBlock('Discriminator.VectorI', 3, 3, 3, R)
+    J = LearnVectorBlock('Discriminator.VectorJ', 3, 3, 3, R)
+    K = LearnVectorBlock('Discriminator.VectorK', 3, 3, 3, R)
+    output = tf.concat([R, I, J, K], axis=1)
+    output = QuaternionConv2D('Discriminator.Input', 12, dim, 3, output, he_init=False)
+
+    output = QuaternionResidualBlock('Discriminator.Res1', dim, 2 * dim, 3, output, resample='down', bn=bn)
+    output = QuaternionResidualBlock('Discriminator.Res2', 2 * dim, 4 * dim, 3, output, resample='down', bn=bn)
+    output = QuaternionResidualBlock('Discriminator.Res3', 4 * dim, 8 * dim, 3, output, resample='down', bn=bn)
+    output = QuaternionResidualBlock('Discriminator.Res4', 8 * dim, 8 * dim, 3, output, resample='down', bn=bn)
+
+    output = tf.reshape(output, [-1, fact * fact * 8 * dim])
+    output = lib.ops.linear.Linear('Discriminator.Output', fact * fact * 8 * dim, 1, output)
+
+    return tf.reshape(output, [-1])
+
 def MultiplicativeDCGANDiscriminator(inputs, dim=DIM, bn=True):
     output = tf.reshape(inputs, [-1, 3, DIM, DIM])
 
