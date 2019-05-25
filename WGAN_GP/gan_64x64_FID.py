@@ -364,6 +364,39 @@ def ResidualBlock(name, input_dim, output_dim, filter_size, inputs, resample=Non
 
     return shortcut + output
 
+def QuaternionResidualBlock(name, input_dim, output_dim, filter_size, inputs, resample=None, he_init=True, bn=False):
+    """
+    resample: None, 'down', or 'up'
+    """
+    if resample == 'down':
+        conv_shortcut = QuaternionMeanPoolConv
+        conv_1        = functools.partial(QuaternionConv2D, input_dim=input_dim, output_dim=input_dim)
+        conv_2        = functools.partial(QuaternionConvMeanPool, input_dim=input_dim, output_dim=output_dim)
+    elif resample == None:
+        conv_shortcut = QuaternionConv2D
+        conv_1        = functools.partial(QuaternionConv2D, input_dim=input_dim, output_dim=input_dim)
+        conv_2        = functools.partial(QuaternionConv2D, input_dim=input_dim, output_dim=output_dim)
+    else:
+        raise Exception('invalid resample value')
+
+    if output_dim == input_dim and resample == None:
+        shortcut = inputs # Identity skip-connection
+    else:
+        shortcut = conv_shortcut(name + '.Shortcut', input_dim=input_dim, output_dim=output_dim, filter_size=1,
+                                 he_init=False, biases=True, inputs=inputs)
+
+    output = inputs
+    if bn:
+      output = QuaternionNormalize(name + '.BN1', [0, 2, 3], output)
+    output = tf.nn.relu(output)
+    output = conv_1(name + '.Conv1', filter_size=filter_size, inputs=output, he_init=he_init, biases=False)
+    if bn:
+      output = QuaternionNormalize(name + '.BN2', [0, 2, 3], output)
+    output = tf.nn.relu(output)
+    output = conv_2(name + '.Conv2', filter_size=filter_size, inputs=output, he_init=he_init)
+
+    return shortcut + output
+
 
 # ! Generators
 
