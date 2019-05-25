@@ -245,6 +245,13 @@ def UpsampleConv(name, input_dim, output_dim, filter_size, inputs, he_init=True,
     output = lib.ops.conv2d.Conv2D(name, input_dim, output_dim, filter_size, output, he_init=he_init, biases=biases)
     return output
 
+def QuaternionMeanPoolConv(name, input_dim, output_dim, filter_size, inputs, he_init=True, biases=True):
+    output = inputs
+    output = tf.add_n(
+        [output[:, :, ::2, ::2], output[:, :, 1::2, ::2], output[:, :, ::2, 1::2], output[:, :, 1::2, 1::2]]) / 4.
+    output = QuaternionConv2D(name, input_dim, output_dim, filter_size, output, he_init=he_init, biases=biases)
+    return output
+
 def QuaternionConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=True, stride=1, biases=True):
     convArgs = {
         'padding': 'same',
