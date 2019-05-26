@@ -258,6 +258,15 @@ def QuaternionMeanPoolConv(name, input_dim, output_dim, filter_size, inputs, he_
     output = QuaternionConv2D(name, input_dim, output_dim, filter_size, output, he_init=he_init, biases=biases)
     return output
 
+def QuaternionUpsampleConv(name, input_dim, output_dim, filter_size, inputs, he_init=True, biases=True):
+    output = inputs
+    output = tf.concat([output, output, output, output], axis=1)
+    output = tf.transpose(output, [0, 2, 3, 1])
+    output = tf.depth_to_space(output, 2)
+    output = tf.transpose(output, [0, 3, 1, 2])
+    output = QuaternionConv2D(name, input_dim, output_dim, filter_size, output, he_init=he_init, biases=biases)
+    return output
+
 def QuaternionConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=True, stride=1, biases=True):
     convArgs = {
         'padding': 'same',
