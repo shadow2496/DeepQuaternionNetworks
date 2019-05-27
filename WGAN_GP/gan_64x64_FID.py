@@ -434,6 +434,28 @@ def GoodGenerator(n_samples, noise=None, dim=DIM, nonlinearity=tf.nn.relu, bn=BN
 
     return tf.reshape(output, [-1, OUTPUT_DIM])
 
+def QuaternionGenerator(n_samples, noise=None, dim=DIM, nonlinearity=tf.nn.relu, bn=BN_G):
+    if noise is None:
+        noise = tf.random_normal([n_samples, 128])
+
+    ## supports 32x32 images
+    fact = DIM // 16
+
+    output = lib.ops.linear.Linear('Generator.Input', 128, fact * fact * 8 * dim, noise)
+    output = tf.reshape(output, [-1, 8 * dim, fact, fact])
+
+    output = QuaternionResidualBlock('Generator.Res1', 8 * dim, 8 * dim, 3, output, resample='up', bn=bn)
+    output = QuaternionResidualBlock('Generator.Res2', 8 * dim, 4 * dim, 3, output, resample='up', bn=bn)
+    output = QuaternionResidualBlock('Generator.Res3', 4 * dim, 2 * dim, 3, output, resample='up', bn=bn)
+    output = QuaternionResidualBlock('Generator.Res4', 2 * dim, 1 * dim, 3, output, resample='up', bn=bn)
+    if bn:
+        output = QuaternionNormalize('Generator.OutputN', [0, 2, 3], output)
+    output = tf.nn.relu(output)
+    output = lib.ops.conv2d.Conv2D('Generator.Output', 1 * dim, 3, 3, output)
+    output = tf.tanh(output)
+
+    return tf.reshape(output, [-1, OUTPUT_DIM])
+
 def FCGenerator(n_samples, noise=None, FC_DIM=512):
     if noise is None:
         noise = tf.random_normal([n_samples, 128])
