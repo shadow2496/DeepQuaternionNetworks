@@ -381,6 +381,10 @@ def QuaternionResidualBlock(name, input_dim, output_dim, filter_size, inputs, re
         conv_shortcut = QuaternionMeanPoolConv
         conv_1        = functools.partial(QuaternionConv2D, input_dim=input_dim, output_dim=input_dim)
         conv_2        = functools.partial(QuaternionConvMeanPool, input_dim=input_dim, output_dim=output_dim)
+    elif resample == 'up':
+        conv_shortcut = QuaternionUpsampleConv
+        conv_1        = functools.partial(QuaternionUpsampleConv, input_dim=input_dim, output_dim=output_dim)
+        conv_2        = functools.partial(QuaternionConv2D, input_dim=output_dim, output_dim=output_dim)
     elif resample == None:
         conv_shortcut = QuaternionConv2D
         conv_1        = functools.partial(QuaternionConv2D, input_dim=input_dim, output_dim=input_dim)
