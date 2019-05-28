@@ -76,11 +76,11 @@ class LayerNormalization(Layer):
         self.gamma = self.add_weight(shape,
                                      initializer=self.gamma_init,
                                      regularizer=self.gamma_regularizer,
-                                     name=self.name+'{}_gamma'.format(self.name))
+                                     name='{}_gamma'.format(self.name))
         self.beta = self.add_weight(shape,
                                     initializer=self.beta_init,
                                     regularizer=self.beta_regularizer,
-                                    name=self.name+'{}_beta'.format(self.name))
+                                    name='{}_beta'.format(self.name))
 
         self.built = True
 

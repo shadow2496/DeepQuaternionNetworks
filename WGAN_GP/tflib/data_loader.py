@@ -5,7 +5,7 @@ import os
 from glob import glob
 
 def make_generator(path, batch_size, dataset):
-    #print("scan files", end=" ", flush=True)
+    print("scan files", end=" ", flush=True)
     if dataset == "celeba":
       files = glob(os.path.join(path, "*.jpg"))
       dim = 64
@@ -17,7 +17,7 @@ def make_generator(path, batch_size, dataset):
       # into subdirectories named 0, 1, .., 304
       files = []
       for i in range(304):
-        #print("\rscan files %d" % i, end="", flush=True)
+        print("\rscan files %d" % i, end="", flush=True)
         files += glob(os.path.join(path, str(i), "*.jpg"))
       dim = 64
     n_files = len(files)
@@ -30,6 +30,9 @@ def make_generator(path, batch_size, dataset):
         random_state.shuffle(files_idx)
         for n, i in enumerate(files_idx):
             image = scipy.misc.imread(files[i])
+            hh = image.shape[0] // 2
+            hw = image.shape[1] // 2
+            image = scipy.misc.imresize(image[hh - 128:hh + 128, hw - 128:hw + 128], (64, 64))
             images[n % batch_size] = image.transpose(2,0,1)
             if n > 0 and n % batch_size == 0:
                 yield (images,)
