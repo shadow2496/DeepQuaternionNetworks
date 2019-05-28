@@ -25,6 +25,8 @@ from quaternion_layers.norm import QuaternionLayerNorm
 
 import keras.backend as K
 from keras.regularizers import l2
+K.set_image_data_format('channels_first')
+K.set_image_dim_ordering('th')
 
 
 '''
@@ -48,7 +50,7 @@ MODE = 'wgan-gp' # dcgan, wgan, wgan-gp, lsgan
 DIM = 64 # Model dimensionality
 
 # Settings for TTUR and orig
-TTUR = True
+TTUR = False
 if TTUR:
   CRITIC_ITERS = 1 # How many iterations to train the critic for
   D_LR = 0.0003
@@ -135,7 +137,7 @@ def GeneratorAndDiscriminator():
     """
 
     # For actually generating decent samples, use this one
-    return GoodGenerator, GoodDiscriminator
+    return GoodGenerator, QuaternionDiscriminator
 
     # Baseline (G: DCGAN, D: DCGAN)
     #return DCGANGenerator, DCGANDiscriminator
@@ -377,6 +379,7 @@ def QuaternionResidualBlock(name, input_dim, output_dim, filter_size, inputs, re
     """
     resample: None, 'down', or 'up'
     """
+
     if resample == 'down':
         conv_shortcut = QuaternionMeanPoolConv
         conv_1        = functools.partial(QuaternionConv2D, input_dim=input_dim, output_dim=input_dim)
@@ -400,11 +403,11 @@ def QuaternionResidualBlock(name, input_dim, output_dim, filter_size, inputs, re
 
     output = inputs
     if bn:
-      output = QuaternionNormalize(name + '.BN1', [0, 2, 3], output)
+      output = QuaternionNormalize(name + '.BN1', output)
     output = tf.nn.relu(output)
     output = conv_1(name + '.Conv1', filter_size=filter_size, inputs=output, he_init=he_init, biases=False)
     if bn:
-      output = QuaternionNormalize(name + '.BN2', [0, 2, 3], output)
+      output = QuaternionNormalize(name + '.BN2', output)
     output = tf.nn.relu(output)
     output = conv_2(name + '.Conv2', filter_size=filter_size, inputs=output, he_init=he_init)
 
@@ -449,7 +452,7 @@ def QuaternionGenerator(n_samples, noise=None, dim=DIM, nonlinearity=tf.nn.relu,
     output = QuaternionResidualBlock('Generator.Res3', 4 * dim, 2 * dim, 3, output, resample='up', bn=bn)
     output = QuaternionResidualBlock('Generator.Res4', 2 * dim, 1 * dim, 3, output, resample='up', bn=bn)
     if bn:
-        output = QuaternionNormalize('Generator.OutputN', [0, 2, 3], output)
+        output = QuaternionNormalize('Generator.OutputN', output)
     output = tf.nn.relu(output)
     output = lib.ops.conv2d.Conv2D('Generator.Output', 1 * dim, 3, 3, output)
     output = tf.tanh(output)
@@ -612,6 +615,7 @@ def QuaternionDiscriminator(inputs, dim=DIM, bn=BN_D):
     J = LearnVectorBlock('Discriminator.VectorJ', 3, 3, 3, R)
     K = LearnVectorBlock('Discriminator.VectorK', 3, 3, 3, R)
     output = tf.concat([R, I, J, K], axis=1)
+
     output = QuaternionConv2D('Discriminator.Input', 12, dim, 3, output, he_init=False)
 
     output = QuaternionResidualBlock('Discriminator.Res1', dim, 2 * dim, 3, output, resample='down', bn=bn)
