@@ -50,7 +50,7 @@ MODE = 'wgan-gp' # dcgan, wgan, wgan-gp, lsgan
 DIM = 64 # Model dimensionality
 
 # Settings for TTUR and orig
-TTUR = False
+TTUR = True
 if TTUR:
   CRITIC_ITERS = 1 # How many iterations to train the critic for
   D_LR = 0.0003
@@ -137,7 +137,7 @@ def GeneratorAndDiscriminator():
     """
 
     # For actually generating decent samples, use this one
-    return GoodGenerator, QuaternionDiscriminator
+    return GoodGenerator, GoodDiscriminator
 
     # Baseline (G: DCGAN, D: DCGAN)
     #return DCGANGenerator, DCGANDiscriminator
