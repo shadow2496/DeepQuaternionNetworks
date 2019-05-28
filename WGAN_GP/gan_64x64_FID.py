@@ -1,5 +1,5 @@
 import os, sys
-sys.path.append(os.getcwd())
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 
 import time
 import functools
@@ -42,7 +42,7 @@ if len(DATA_DIR) == 0:
 INCEPTION_DIR = "inception-2015-12-05"
 
 # Path to the real world statistics file.
-STAT_FILE = "stats/fid_stats_lsun.npz"
+STAT_FILE = "stats/fid_stats_lsun_train.npz"
 
 MODE = 'wgan-gp' # dcgan, wgan, wgan-gp, lsgan
 DIM = 64 # Model dimensionality
