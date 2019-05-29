@@ -6,7 +6,16 @@ import locale
 locale.setlocale(locale.LC_ALL, '')
 
 _params = {}
+_qparams = {}
 _param_aliases = {}
+
+def qparam(name, cls, args):
+    if name not in _qparams:
+        instance = cls(**args)
+        _qparams[name] = instance
+    result = _qparams[name]
+    return result
+
 def param(name, *args, **kwargs):
     """
     A wrapper for `tf.Variable` which enables parameter sharing in models.

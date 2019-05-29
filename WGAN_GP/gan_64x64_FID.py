@@ -202,7 +202,8 @@ def QuaternionNormalize(name, inputs, stats_iter=None) :
         'epsilon': 1e-04
         }
 
-        return QuaternionLayerNorm(**lnArgs)(inputs)
+        return lib.qparam(name, QuaternionLayerNorm, lnArgs)(inputs)
+        # return QuaternionLayerNorm(**lnArgs)(inputs)
 
     else:
         bnArgs = {
@@ -214,7 +215,8 @@ def QuaternionNormalize(name, inputs, stats_iter=None) :
 
         ''' When using BN, "training=False" is necessary as call argument'''
 
-        return QuaternionBatchNorm(**bnArgs)(inputs)
+        return lib.qparam(name, QuaternionBatchNorm, bnArgs)(inputs)
+        # return QuaternionBatchNorm(**bnArgs)(inputs)
 
 def pixcnn_gated_nonlinearity(a, b):
     return tf.sigmoid(a) * tf.tanh(b)
@@ -274,12 +276,17 @@ def QuaternionConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=T
         'padding': 'same',
         'use_bias': biases,
         'kernel_regularizer': l2(0.0001),
-        'init_criterion': 'he' if he_init else 'glorot'
+        'init_criterion': 'he' if he_init else 'glorot',
+
+        'filters': output_dim,
+        'kernel_size': (filter_size, filter_size),
+        'strides': (stride, stride)
     }
 
     with tf.name_scope(name) as scope:
-        result = QConv2D(output_dim, (filter_size, filter_size), strides=(stride, stride), **convArgs)(inputs)
-        return result
+        return lib.qparam(name, QConv2D, convArgs)(inputs)
+        # result = QConv2D(output_dim, (filter_size, filter_size), strides=(stride, stride), **convArgs)(inputs)
+        # return result
 
 def LearnVectorBlock(name, input_dim, output_dim, filter_size, inputs, he_init=True):
     """Learn initial vector component for input."""
