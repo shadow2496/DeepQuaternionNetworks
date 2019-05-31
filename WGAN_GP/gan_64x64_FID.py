@@ -57,7 +57,7 @@ if TTUR:
   G_LR = 0.0001
   BETA1_D = 0.0
   BETA1_G = 0.0
-  FID_STEP = 1000 # FID evaluation every FID_STEP
+  FID_STEP = 20000 # FID evaluation every FID_STEP
   ITERS = 100000 # How many iterations to train for
 else:
   CRITIC_ITERS = 5 # How many iterations to train the critic for
@@ -65,7 +65,7 @@ else:
   G_LR = 0.0005
   BETA1_D = 0.0
   BETA1_G = 0.0
-  FID_STEP = 333 # FID evaluation every FID_STEP
+  FID_STEP = 5000 # FID evaluation every FID_STEP
   ITERS = 25009 # How many iterations to train for
 
 OUTPUT_STEP = 200 # Print output every OUTPUT_STEP
@@ -111,8 +111,8 @@ if not os.path.exists(TBOARD_DIR):
 
 # FID evaluation.
 FID_EVAL_SIZE = 50000 # Number of samples for evaluation
-FID_SAMPLE_BATCH_SIZE = 1000  # Batch size of generating samples, lower to save GPU memory
-FID_BATCH_SIZE = 200 # Batch size for final FID calculation i.e. inception propagation etc.
+FID_SAMPLE_BATCH_SIZE = 100  # Batch size of generating samples, lower to save GPU memory
+FID_BATCH_SIZE = 50 # Batch size for final FID calculation i.e. inception propagation etc.
 
 # Load checkpoint
 # from https://github.com/carpedm20/DCGAN-tensorflow/blob/master/model.py
@@ -278,7 +278,7 @@ def QuaternionConv2D(name, input_dim, output_dim, filter_size, inputs, he_init=T
         'kernel_regularizer': l2(0.0001),
         'init_criterion': 'he' if he_init else 'glorot',
 
-        'filters': output_dim,
+        'filters': output_dim // 4,
         'kernel_size': (filter_size, filter_size),
         'strides': (stride, stride)
     }
@@ -930,7 +930,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
         if iteration % OUTPUT_STEP == 0:
             lib.plot.flush()
 
-        if (iteration % FID_STEP == 0):
+        if ((iteration != 0) and (iteration % FID_STEP == 0)) or (it == ITERS - 1):
 
           # FID
           samples = np.zeros((FID_EVAL_SIZE, OUTPUT_DIM))
