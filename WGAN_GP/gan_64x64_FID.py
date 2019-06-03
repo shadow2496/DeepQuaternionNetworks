@@ -848,6 +848,10 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
         samples = ((samples+1.)*(255.99//2)).astype('int32')
         lib.save_images.save_images(samples.reshape((BATCH_SIZE, 3, DIM, DIM)), '%s/samples_%d.png' % (SAMPLES_DIR, iteration))
 
+    gen_cost_tfvar = tf.Variable(0.0, trainable=False)
+    gen_cost_sum = tf.summary.scalar("GEN COST", gen_cost_tfvar)
+    disc_cost_tfvar = tf.Variable(0.0, trainable=False)
+    disc_cost_sum = tf.summary.scalar("DISC COST", disc_cost_tfvar)
     fid_tfvar = tf.Variable(0.0, trainable=False)
     fid_sum = tf.summary.scalar("FID", fid_tfvar)
     writer = tf.summary.FileWriter(TBOARD_DIR, session.graph)
@@ -901,7 +905,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
 
         # Train generator
         if iteration > 0:
-            _ = session.run(gen_train_op)
+            _gen_cost, _ = session.run([gen_cost, gen_train_op])
 
         # Train critic
         if (MODE == 'dcgan') or (MODE == 'lsgan'):
@@ -914,6 +918,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
             if MODE == 'wgan':
                 _ = session.run([clip_disc_weights])
 
+        lib.plot.plot('train gen cost', _gen_cost)
         lib.plot.plot('train disc cost', _disc_cost)
         lib.plot.plot('time', time.time() - start_time)
 
@@ -930,7 +935,12 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
         if iteration % OUTPUT_STEP == 0:
             lib.plot.flush()
 
-        if ((iteration != 0) and (iteration % FID_STEP == 0)) or (it == ITERS - 1):
+            session.run([tf.assign(gen_cost_tfvar, _gen_cost), tf.assign(disc_cost_tfvar, _disc_cost)])
+            summary_gen_str, summary_disc_str = session.run([gen_cost_sum, disc_cost_sum])
+            writer.add_summary(summary_gen_str, iteration)
+            writer.add_summary(summary_disc_str, iteration)
+
+        if (iteration % FID_STEP == 0) or (iteration == ITERS - 1):
 
           # FID
           samples = np.zeros((FID_EVAL_SIZE, OUTPUT_DIM))
