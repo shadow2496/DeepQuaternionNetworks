@@ -33,8 +33,8 @@ K.set_image_dim_ordering('th')
 Works also with 32x32x3 images, just set DIM to 32
 '''
 
-DATA_DIR = 'data/lsun'
-DATASET = "lsun" # celeba, cifar10, svhn, lsun
+DATA_DIR = 'data/celeba/images'
+DATASET = "celeba" # celeba, cifar10, svhn, lsun
 if len(DATA_DIR) == 0:
     raise Exception('Please specify path to data directory in gan_64x64.py!')
 
@@ -50,14 +50,14 @@ MODE = 'wgan-gp' # dcgan, wgan, wgan-gp, lsgan
 DIM = 64 # Model dimensionality
 
 # Settings for TTUR and orig
-TTUR = True
+TTUR = False
 if TTUR:
   CRITIC_ITERS = 1 # How many iterations to train the critic for
   D_LR = 0.0003
   G_LR = 0.0001
   BETA1_D = 0.0
   BETA1_G = 0.0
-  FID_STEP = 20000 # FID evaluation every FID_STEP
+  FID_STEP = 10000 # FID evaluation every FID_STEP
   ITERS = 100000 # How many iterations to train for
 else:
   CRITIC_ITERS = 5 # How many iterations to train the critic for
@@ -65,7 +65,7 @@ else:
   G_LR = 0.0005
   BETA1_D = 0.0
   BETA1_G = 0.0
-  FID_STEP = 5000 # FID evaluation every FID_STEP
+  FID_STEP = 2501 # FID evaluation every FID_STEP
   ITERS = 25009 # How many iterations to train for
 
 OUTPUT_STEP = 200 # Print output every OUTPUT_STEP
@@ -85,7 +85,7 @@ BN_G=True
 CHECKPOINT_STEP = FID_STEP
 LOG_DIR = "logs" # Directory for Tensorboard events, checkpoints and samples
 N_GPUS = 1 # Number of GPUs
-BATCH_SIZE = 64 # Batch size. Must be a multiple of N_GPUS
+BATCH_SIZE = 32 # Batch size. Must be a multiple of N_GPUS
 LAMBDA = 10 # Gradient penalty lambda hyperparameter
 OUTPUT_DIM = DIM * DIM * 3 # Number of pixels in each iamge
 
