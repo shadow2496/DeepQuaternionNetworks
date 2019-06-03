@@ -906,6 +906,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
         # Train generator
         if iteration > 0:
             _gen_cost, _ = session.run([gen_cost, gen_train_op])
+            lib.plot.plot('train gen cost', _gen_cost)
 
         # Train critic
         if (MODE == 'dcgan') or (MODE == 'lsgan'):
@@ -918,7 +919,6 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
             if MODE == 'wgan':
                 _ = session.run([clip_disc_weights])
 
-        lib.plot.plot('train gen cost', _gen_cost)
         lib.plot.plot('train disc cost', _disc_cost)
         lib.plot.plot('time', time.time() - start_time)
 
