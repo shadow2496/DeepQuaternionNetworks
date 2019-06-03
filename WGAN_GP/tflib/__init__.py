@@ -43,7 +43,11 @@ def param(name, *args, **kwargs):
     return result
 
 def params_with_name(name):
-    return [p for n,p in _params.items() if name in n]
+    tf_params = [p for n,p in _params.items() if name in n]
+    keras_list = [p.trainable_weights for n,p in _qparams.items() if name in n]
+    keras_params = [item for sublist in keras_list for item in sublist]
+    print([n for n,p in _qparams.items() if name in n])
+    return tf_params + keras_params
 
 def delete_all_params():
     _params.clear()
