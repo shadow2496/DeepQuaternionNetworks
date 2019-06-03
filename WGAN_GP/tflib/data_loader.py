@@ -30,9 +30,9 @@ def make_generator(path, batch_size, dataset):
         random_state.shuffle(files_idx)
         for n, i in enumerate(files_idx):
             image = scipy.misc.imread(files[i])
-            hh = image.shape[0] // 2
+            hh = np.random.randint(89, 129)
             hw = image.shape[1] // 2
-            image = scipy.misc.imresize(image[hh - 128:hh + 128, hw - 128:hw + 128], (64, 64))
+            image = scipy.misc.imresize(image[hh - 89:hh + 89, hw - 89:hw + 89], (64, 64))
             images[n % batch_size] = image.transpose(2,0,1)
             if n > 0 and n % batch_size == 0:
                 yield (images,)
