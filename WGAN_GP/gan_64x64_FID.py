@@ -57,7 +57,7 @@ if TTUR:
   G_LR = 0.0001
   BETA1_D = 0.0
   BETA1_G = 0.0
-  FID_STEP = 10000 # FID evaluation every FID_STEP
+  FID_STEP = 1000 # FID evaluation every FID_STEP
   ITERS = 100000 # How many iterations to train for
 else:
   CRITIC_ITERS = 5 # How many iterations to train the critic for
@@ -65,7 +65,7 @@ else:
   G_LR = 0.0005
   BETA1_D = 0.0
   BETA1_G = 0.0
-  FID_STEP = 2501 # FID evaluation every FID_STEP
+  FID_STEP = 333 # FID evaluation every FID_STEP
   ITERS = 25009 # How many iterations to train for
 
 OUTPUT_STEP = 200 # Print output every OUTPUT_STEP
@@ -831,6 +831,9 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
     else:
         raise Exception()
 
+    # For generating fid samples
+    fid_samples = Generator(FID_SAMPLE_BATCH_SIZE)
+
     # For generating samples
     fixed_noise = tf.constant(np.random.normal(size=(BATCH_SIZE, 128)).astype('float32'))
     all_fixed_noise_samples = []
@@ -955,7 +958,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
             frm = i * FID_SAMPLE_BATCH_SIZE
             to = frm + FID_SAMPLE_BATCH_SIZE
 
-            samples[frm:to] = session.run(Generator(FID_SAMPLE_BATCH_SIZE))
+            samples[frm:to] = session.run(fid_samples)
 
           # Cast, reshape and transpose (BCHW -> BHWC)
           samples = ((samples + 1.0) * 127.5).astype('uint8')
