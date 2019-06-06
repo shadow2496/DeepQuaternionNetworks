@@ -44,7 +44,7 @@ if len(DATA_DIR) == 0:
 INCEPTION_DIR = "inception-2015-12-05"
 
 # Path to the real world statistics file.
-STAT_FILE = "stats/fid_stats_lsun_train.npz"
+STAT_FILE = "stats/fid_stats_celeba.npz"
 
 MODE = 'wgan-gp' # dcgan, wgan, wgan-gp, lsgan
 DIM = 64 # Model dimensionality
@@ -855,6 +855,12 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
     gen_cost_sum = tf.summary.scalar("GEN COST", gen_cost_tfvar)
     disc_cost_tfvar = tf.Variable(0.0, trainable=False)
     disc_cost_sum = tf.summary.scalar("DISC COST", disc_cost_tfvar)
+
+    disc_raw_tfvar = tf.Variable(0.0, trainable=False)
+    disc_raw_sum = tf.summary.scalar("DISC RAW", disc_raw_tfvar)
+    gd_penalty_tfvar = tf.Variable(0.0, trainable=False)
+    gd_penalty_sum = tf.summary.scalar("GRADIENT PENALTY", gd_penalty_tfvar)
+
     fid_tfvar = tf.Variable(0.0, trainable=False)
     fid_sum = tf.summary.scalar("FID", fid_tfvar)
     writer = tf.summary.FileWriter(TBOARD_DIR, session.graph)
@@ -918,7 +924,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
             disc_iters = CRITIC_ITERS
         for i in range(disc_iters):
             _data = gen.__next__()
-            _disc_cost, _ = session.run([disc_cost, disc_train_op], feed_dict={all_real_data_conv: _data})
+            _gradient_penalty, _disc_cost, _ = session.run([gradient_penalty, disc_cost, disc_train_op], feed_dict={all_real_data_conv: _data})
             if MODE == 'wgan':
                 _ = session.run([clip_disc_weights])
 
@@ -938,6 +944,12 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as session:
 
         if iteration % OUTPUT_STEP == 0:
             lib.plot.flush()
+
+            _disc_raw = _disc_cost - LAMBDA * _gradient_penalty
+            session.run([tf.assign(disc_raw_tfvar, _disc_raw), tf.assign(gd_penalty_tfvar, _gradient_penalty)])
+            summary_disc_raw_str, summary_gd_str = session.run([disc_raw_sum, gd_penalty_sum])
+            writer.add_summary(summary_disc_raw_str, iteration)
+            writer.add_summary(summary_gd_str, iteration)
 
             session.run([tf.assign(gen_cost_tfvar, _gen_cost), tf.assign(disc_cost_tfvar, _disc_cost)])
             summary_gen_str, summary_disc_str = session.run([gen_cost_sum, disc_cost_sum])
